@@ -21,7 +21,7 @@ main().catch((error) => {
   //interacted with the token
   //created solidity source code
   //fetched the solidity created source code
-  //learned how to write tests
-  //basic things with ERC-20 tokens
+  //learned how to write tests use tests with Hardhat
+  //basic solidity codes
   //cleaned up code
   
