@@ -24,4 +24,10 @@ main().catch((error) => {
   //learned how to write tests use tests with Hardhat
   //basic solidity codes
   //cleaned up code
+  //buidling out an entire function
+  //how events work
+  //how to check out for events
+  //how to throw errors
+  //how to trigger functions with ether.js 
+  //how to pay for gas costs with each individual account
   
