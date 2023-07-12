@@ -31,3 +31,6 @@ main().catch((error) => {
   //how to trigger functions with ether.js 
   //how to pay for gas costs with each individual account
   //cryptocurrency smart contract 
+  //deposited tokens in to the exchange
+  //checked the balances
+  
