@@ -10,6 +10,12 @@ contract Exchange {
     
     mapping(address => mapping(address => uint256)) public tokens;
 
+    //Orders Mapping - tokenGet & the amountGet, tokenGive & amountGive
+    mapping(uint256 => _Order) public orders;
+    uint256 public orderCount;
+
+
+
     event Deposit(
         address token, 
         address user, 
@@ -22,7 +28,26 @@ contract Exchange {
         uint256 amount,
         uint256 balance
     );
-
+    event Order (
+        uint256 id,
+        address user,
+        address tokenGet,
+        uint256 amountGet, 
+        address tokenGive,
+        uint256 amountGive, 
+        uint256 timestamp
+    );
+    //way to model the order
+    struct _Order {
+        //Attributes of the orders -
+        uint256 id; // unique identifier for the order
+        address user; // address of the user who made the order
+        address tokenGet; //the address of the tokenGet
+        uint256 amountGet; //amount of tokenGet
+        address tokenGive; // the address of the tokenGive
+        uint256 amountGive; //amount of the tokenGive
+        uint256 timestamp; //when order was created
+    }
     constructor(address _feeAccount, uint256 _feePercent) {
         feeAccount = _feeAccount;
         feePercent = _feePercent;
@@ -66,6 +91,47 @@ contract Exchange {
         returns (uint256)
     {
         return tokens[_token][_user];
+    }
+
+    //----------------------
+    //MAKE AND CANCEL ORDERS
+
+    //tokenGive - (the token they want to spend) which token and how much
+    //tokenGet - (the token they want to receive) which token and how much
+
+
+    function makeOrder(
+        address _tokenGet, 
+        uint256 _amountGet, 
+        address _tokenGive, 
+        uint256 _amountGive
+    ) public {
+        require(balanceOf(_tokenGive, msg.sender) >= _amountGive);
+
+
+        orderCount = orderCount + 1;
+        orders[orderCount] = _Order(
+            orderCount, // ID 
+            msg.sender, // user
+            _tokenGet, // tokenGet
+            _amountGet, // amountGet
+            _tokenGive, // tokenGive
+            _amountGive, // amountGive
+            block.timestamp //current  timestamp
+        );
+
+        //Emit event
+            emit Order(
+                orderCount, 
+                msg.sender, 
+                _tokenGet, 
+                _amountGet,
+                _tokenGive,
+                _amountGive,
+                block.timestamp
+            );
+
+        //require token balance before making orders
     }
 
 
