@@ -13,6 +13,7 @@ contract Exchange {
     //Orders Mapping - tokenGet & the amountGet, tokenGive & amountGive
     mapping(uint256 => _Order) public orders;
     uint256 public orderCount;
+    mapping(uint256 => bool) public orderCancelled;
 
 
 
@@ -28,6 +29,16 @@ contract Exchange {
         uint256 amount,
         uint256 balance
     );
+    event Cancel (
+        uint256 id,
+        address user,
+        address tokenGet,
+        uint256 amountGet, 
+        address tokenGive,
+        uint256 amountGive, 
+        uint256 timestamp
+    );
+
     event Order (
         uint256 id,
         address user,
@@ -130,9 +141,33 @@ contract Exchange {
                 _amountGive,
                 block.timestamp
             );
-
-        //require token balance before making orders
     }
+    function cancelOrder(uint256 _id) public {
+        // fetch the order
+        _Order storage _order = orders[_id];
+
+        require(address(_order.user) == msg.sender);
+
+        //Order must exist
+        require(_order.id == _id);
+        
+        //cancel the order
+        orderCancelled[_id] = true;
 
 
+        
+        //emit event
+        emit Cancel(
+            _order.id,
+            msg.sender,
+            _order.tokenGet,
+            _order.amountGet,
+            _order.tokenGive,
+            _order.amountGive,
+            block.timestamp
+        );
+         
+
+
+    } 
 }
