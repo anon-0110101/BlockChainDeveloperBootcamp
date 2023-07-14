@@ -8,17 +8,16 @@ const tokens = (n) => {
 
 describe("Exchange", () =>{
     //Tests go inside here
-    let deployer, feeAccount, exchange, user1, user2
+    let deployer, feeAccount, exchange
 
     const feePercent = 10
 
     beforeEach(async () => {
-        
         const Exchange = await ethers.getContractFactory("Exchange")
         const Token = await ethers.getContractFactory("Token")
 
         token1 = await Token.deploy("Rancho Las Monjas", "RLM", "1000000")
-        token2 = await Token.deploy("Mock Dai", "MDAI", "1000000")
+        token2 = await Token.deploy("Mock Dai", "mDAI", "1000000")
 
         accounts = await ethers.getSigners()
         deployer = accounts[0]
@@ -52,8 +51,7 @@ describe("Exchange", () =>{
         })
     })
 
-    describe("Depositing tokens", () =>{
-        
+    describe("Depositing tokens", () =>{ 
         let transaction, result
         let amount = tokens(10)
 
@@ -217,9 +215,19 @@ describe("Exchange", () =>{
             //Deposit tokens
             transaction = await exchange.connect(user1).depositToken(token1.address, amount)
             result = await transaction.wait()
+            // Give tokens to user 2
+            transaction = await token2.connect(deployer).transfer(user2.address, tokens(100))
+            result = await transaction.wait()
+            //user2 deposit tokens to the exchange
+            transaction = await token2.connect(user2).approve(exchange.address, tokens(2))
+            result = await transaction.wait()
+            //deposit tokens
+            transaction = await exchange.connect(user2).depositToken(token2.address, tokens(2))
+            result = await transaction.wait()
 
             transaction = await exchange.connect(user1).makeOrder(token2.address, amount, token1.address, amount)
             result = await transaction.wait()
+
         })
 
         
@@ -270,6 +278,62 @@ describe("Exchange", () =>{
             })
             
         })
+        describe('Filling orders', async () => {
+            describe("Success", () => {
+                 beforeEach(async () => {
+                // user2 fills order
+                transaction = await exchange.connect(user2).fillOrder('1')
+                result = await transaction.wait()
+            })
+            it('executes the trade and charge fees', async () => {
+                // Token Give
+                expect(await exchange.balanceOf(token1.address, user1.address)).to.equal(tokens(0))
+                expect(await exchange.balanceOf(token1.address, user2.address)).to.equal(tokens(1))
+                expect(await exchange.balanceOf(token1.address, feeAccount.address)).to.equal(tokens(0))
+                // Token get
+                expect(await exchange.balanceOf(token2.address, user1.address)).to.equal(tokens(1))
+                expect(await exchange.balanceOf(token2.address, user2.address)).to.equal(tokens(0.9))
+                expect(await exchange.balanceOf(token2.address, feeAccount.address)).to.equal(tokens(0.1))
+            })
+            it("updates filled orders", async () =>{
+                expect(await exchange.orderFilled(1)).to.equal(true)
+            })
+            it("emits a Trade event", async () => {
+                const event = result.events[0]
+                expect(event.event).to.equal("Trade")
+        
+                const args = event.args
+                expect(args.id).to.equal(1)
+                expect(args.user).to.equal(user2.address)
+                expect(args.tokenGet).to.equal(token2.address)
+                expect(args.amountGet).to.equal(tokens(1))
+                expect(args.tokenGive).to.equal(token1.address)
+                expect(args.amountGive).to.equal(tokens(1))
+                expect(args.creator).to.equal(user1.address)
+                expect(args.timestamp).to.at.least(1)
+            })
+            })
+            describe("Failure", () => {
+                it("rejects Invalid order Ids", async () => {
+                    const invalidOrderId = 99999;
+                    await expect(exchange.connect(user2).fillOrder(invalidOrderId)).to.be.reverted
+
+                })
+                it("rejects order already filled orders", async () => {
+                    transaction = await exchange.connect(user2).fillOrder(1)
+                    await transaction.wait()
+
+                    await expect(exchange.connect(user2).fillOrder(1)).to.be.reverted
+                })
+                it("rejects cancelled orders", async () => {
+                    transaction = await exchange.connect(user1).cancelOrder(1)
+                    await transaction.wait()
+
+                    await expect(exchange.connect(user2).fillOrder(1)).to.be.reverted
+                })
+            })
+        })
 
     })
+
 })
