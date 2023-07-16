@@ -1,11 +1,32 @@
 async function main () {
+    console.log(`Preparing deployment ....\n`)
+
     const Token = await ethers.getContractFactory("Token")
-
-    const token = await Token.deploy()
+    const Exchange = await ethers.getContractFactory("Exchange")
     
-    await token.deployed()
+    const accounts = await ethers.getSigners()
 
-    console.log(`Token deployed to: ${token.address}`)
+    console.log(`Accounts fetcheds: \n${accounts[0].address}\n${accounts[1].address}\n`)
+
+    //Deploy Contracts ---- Migration script
+
+    const RanchoToken = await Token.deploy("Rancho Las Monjas", "RLM", "1000000")
+    await RanchoToken.deployed()
+
+    console.log(`RanchoToken deployed to: ${RanchoToken.address}`)
+
+    const mETH = await Token.deploy("mETH", "mETH", "1000000")
+    await mETH.deployed()
+    console.log(`mETH deployed to: ${mETH.address}`)
+
+    const mDAI = await Token.deploy("mDAI", "mDAI", "1000000")
+    await mDAI.deployed()
+    console.log(`mDAI deployed to: ${mDAI.address}`)
+
+    const exchange = await Exchange.deploy(accounts[1].address, 10)
+    await exchange.deployed()
+    console.log(`Exchange deployed to: ${exchange.address}`)
+    
 
 }
 
