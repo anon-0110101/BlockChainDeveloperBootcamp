@@ -7,22 +7,32 @@ import {
   loadProvider, 
   loadNetwork, 
   loadAccount,
-  loadToken
+  loadTokens,
+  loadExchange
 } from '../store/interactions';
 
 function App() {
   const dispatch = useDispatch()
 
   const loadBlockchainData = async () => {
-    await loadAccount(dispatch)
-
-
     // Connect ethers to blockchain
     const provider = loadProvider(dispatch)
+    
+    //fetch current networks chainId(ex. hardhat 31337, kovan: 42)
     const chainId = await loadNetwork(provider, dispatch)
-    // Token smart contract
 
-    await loadToken(provider, config[chainId].RanchoToken.address, dispatch)
+    //fetch current account and balance from Metamask
+    await loadAccount(provider, dispatch)
+    // Token smart contract
+    const RanchoToken = config[chainId].RanchoToken
+    const mETH = config[chainId].mETH
+    console.log(RanchoToken.balance)
+
+    await loadTokens(provider, [RanchoToken.address, mETH.address], dispatch)
+    
+    const exchangeConf = config[chainId].exchange
+    await loadExchange(provider, exchangeConf.address, dispatch)
+
   }
 
   useEffect(() => {
