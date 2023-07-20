@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import config from '../config.json'; 
 
-
 import { 
   loadProvider, 
   loadNetwork, 
@@ -10,6 +9,8 @@ import {
   loadTokens,
   loadExchange
 } from '../store/interactions';
+
+import Navbar from './Navbar';
 
 function App() {
   const dispatch = useDispatch()
@@ -21,12 +22,17 @@ function App() {
     //fetch current networks chainId(ex. hardhat 31337, kovan: 42)
     const chainId = await loadNetwork(provider, dispatch)
 
+    window.ethereum.on('chainChanged', () => {
+      window.location.reload()
+    })
+
     //fetch current account and balance from Metamask
-    await loadAccount(provider, dispatch)
+    window.ethereum.on('accountsChanged', () => {
+    loadAccount(provider, dispatch)
+    })
     // Token smart contract
     const RanchoToken = config[chainId].RanchoToken
     const mETH = config[chainId].mETH
-    console.log(RanchoToken.balance)
 
     await loadTokens(provider, [RanchoToken.address, mETH.address], dispatch)
     
@@ -42,7 +48,7 @@ function App() {
   return (
     <div>
 
-      {/* Navbar */}
+      <Navbar />
 
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
