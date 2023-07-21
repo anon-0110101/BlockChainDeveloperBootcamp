@@ -7,11 +7,13 @@ import {
   loadNetwork, 
   loadAccount,
   loadTokens,
-  loadExchange
+  loadExchange,
+  subscribeToEvents
 } from '../store/interactions';
 
 import Navbar from './Navbar';
 import Markets from './Markets';
+import Balance from './Balance';
 
 function App() {
   const dispatch = useDispatch()
@@ -38,7 +40,10 @@ function App() {
     await loadTokens(provider, [RanchoToken.address, mETH.address], dispatch)
     
     const exchangeConf = config[chainId].exchange
-    await loadExchange(provider, exchangeConf.address, dispatch)
+    const exchange = await loadExchange(provider, exchangeConf.address, dispatch)
+
+
+    subscribeToEvents(exchange, dispatch)
 
   }
 
@@ -56,7 +61,7 @@ function App() {
 
           <Markets />
 
-          {/* Balance */}
+          <Balance />
 
           {/* Order */}
 
