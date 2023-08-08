@@ -46,12 +46,12 @@ async function main() {
   const user2 = accounts[1]
   amount = tokens(10000)
 
-  // user1 approves 10,000 Rancho Token...
+  // user1 approves 10,000 Dapp...
   transaction = await RanchoToken.connect(user1).approve(exchange.address, amount)
   await transaction.wait()
   console.log(`Approved ${amount} tokens from ${user1.address}`)
 
-  // user1 deposits 10,000 RanchoToken...
+  // user1 deposits 10,000 DApp...
   transaction = await exchange.connect(user1).depositToken(RanchoToken.address, amount)
   await transaction.wait()
   console.log(`Deposited ${amount} Ether from ${user1.address}\n`)

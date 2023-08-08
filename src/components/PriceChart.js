@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 
-import Chart from 'react-apexcharts';
+import Chart from "react-apexcharts"
 
 import arrowDown from '../assets/down-arrow.svg';
 import arrowUp from '../assets/up-arrow.svg';
