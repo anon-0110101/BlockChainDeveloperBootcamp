@@ -14,7 +14,19 @@
     },
     "explorerURL": "#"
   },
-  "5": {
-    "explorerURL": "https://goerli.etherscan.io"
+  "11155111": {
+    "exchange": {
+      "address": "0x801c35291617429a6F1f9EC9695678b168eCb17F"
+    },
+    "RanchoToken": {
+      "address": "0x6e3bdB8CcC49178EfFcD557a624E80111eC06D1b"
+    },
+    "mETH": {
+      "address": "0xB23d433E2d694A6d730B81Ba62DD10aA367C6361"
+    },
+    "mDAI": {
+      "address": "0xb1062c367556Abb55E42F4cC87dC5D8872EfD997"
+    },
+    "explorerURL": "https://sepolia.etherscan.io"
   }
 }
